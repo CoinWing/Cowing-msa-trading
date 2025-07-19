@@ -53,7 +53,7 @@ public class OrderQueue {
                 try {
                     log.info("{} 처리를 시작합니다.", task);
                     tradeProcessorWrapper.process(task);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         } catch (InterruptedException ignored) {
