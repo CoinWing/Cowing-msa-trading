@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @AllArgsConstructor
@@ -35,6 +36,11 @@ public class Portfolio {
     @Column(name = "average_cost", nullable = false)
     private Long averageCost;
 
+    @Setter
+    @Getter
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @Builder
     public Portfolio(String username, String marketCode, BigDecimal quantity, Long averageCost, Long totalCost) {
         this.username = username;
@@ -42,6 +48,7 @@ public class Portfolio {
         this.quantity = quantity;
         this.averageCost = averageCost;
         this.totalCost = totalCost;
+        this.createdAt = LocalDateTime.now();
     }
 
 }
