@@ -60,7 +60,12 @@ jobs:
             ${{ env.REGISTRY }}/${{ steps.image_name.outputs.image_name }}:${{ steps.version.outputs.version }}
             ${{ env.REGISTRY }}/${{ steps.image_name.outputs.image_name }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,/tmp/.buildx-cache,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cach, mode=max
+
+      - name: Move cache  # 캐시 이동으로 안정성 확보
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       # 디스코드 알람 전송
       - name: Send Discord Notification
