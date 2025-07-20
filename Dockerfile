@@ -1,29 +1,33 @@
-FROM gradle:8.14.2-jdk21 AS build
+FROM gradle:8.14.3-jdk21-alpine AS build
 
 WORKDIR /app
 
 COPY build.gradle settings.gradle gradlew ./
-COPY gradle ./gradle
-RUN ./gradlew dependencies --no-daemon
+RUN gradle dependencies --no-daemon --build-cache
 
 COPY src ./src
-RUN ./gradlew build -x test --no-daemon
+RUN gradle bootJar -x test --no-daemon --build-cache
 
-FROM amazoncorretto:21.0.7-alpine3.19
+RUN java -Djarmode=tools -jar build/libs/*.jar extract --layers --launcher --destination trading-app
 
-ARG APP_USER_ID=1001
-ARG APP_GROUP_ID=1001
-RUN addgroup --gid ${APP_GROUP_ID} javauser && \
-    adduser --uid ${APP_USER_ID} --ingroup javauser --no-create-home --disabled-password javauser
+FROM eclipse-temurin:21-jre-alpine-3.20
+
+ARG ID=1001
+RUN addgroup --gid ${ID} javauser && \
+    adduser --uid ${ID} --ingroup javauser --no-create-home --disabled-password javauser
 
 WORKDIR /app
 
-COPY --from=build --chown=javauser:javauser /app/build/libs/*.jar /app.jar
+ARG LAYERED_JAR=/app/trading-app
+COPY --from=build --chown=javauser:javauser ${LAYERED_JAR}/dependencies/ ./
+COPY --from=build --chown=javauser:javauser ${LAYERED_JAR}/spring-boot-loader/ ./
+COPY --from=build --chown=javauser:javauser ${LAYERED_JAR}/snapshot-dependencies/ ./
+COPY --from=build --chown=javauser:javauser ${LAYERED_JAR}/application/ ./
 
-RUN chmod 500 /app.jar
-
-USER javauser
+RUN chmod -R 555 /app
 
 EXPOSE 8082
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "/app.jar"]
+USER javauser
+
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "org.springframework.boot.loader.launch.JarLauncher"]
