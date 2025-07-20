@@ -60,12 +60,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ steps.image_name.outputs.image_name }}:${{ steps.version.outputs.version }}
             ${{ env.REGISTRY }}/${{ steps.image_name.outputs.image_name }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,/tmp/.buildx-cache-new,mode=max
-
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          cache-to: type=local,/tmp/.buildx-cache,mode=max
 
       # 디스코드 알람 전송
       - name: Send Discord Notification
