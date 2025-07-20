@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "user")
 @Getter
@@ -36,6 +38,12 @@ public class User {
 
     @Column(nullable = false)
     private Long uHoldings;
+
+    @Column
+    private LocalDateTime bankruptAt;
+
+    @Column
+    private LocalDateTime deletedAt;
 
     @PrePersist
     public void prePersist() {
