@@ -47,7 +47,7 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v4
         with:
-          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
+          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile', 'build.gradle') }}
           path: /tmp/.buildx-cache
           restore-keys: ${{ runner.os }}-docker-
 

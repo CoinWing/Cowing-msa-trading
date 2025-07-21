@@ -3,10 +3,10 @@ FROM gradle:8.14.3-jdk21-alpine AS build
 WORKDIR /app
 
 COPY build.gradle settings.gradle gradlew ./
-RUN gradle dependencies --no-daemon --build-cache
+RUN --mount=type=cache,target=/root/.gradle gradle dependencies --no-daemon -x test --build-cache
 
 COPY src ./src
-RUN gradle bootJar -x test --no-daemon --build-cache
+RUN --mount=type=cache,target=/root/.gradle gradle bootJar -x test --no-daemon --build-cache
 
 RUN java -Djarmode=tools -jar build/libs/*.jar extract --layers --launcher --destination trading-app
 
