@@ -59,10 +59,9 @@ public class OrderService {
                                     portfolio.setQuantity(portfolio.getQuantity().subtract(totalQuantity));
                                     portfolio.setTotalCost(portfolio.getTotalCost() - totalPrice.longValue());
 
-                                    // 만약 매도 후 수량이 0 이하가 되면 해당 포트폴리오를 삭제한다.
+                                    // 만약 매도 후 수량이 0 이하가 되면 해당 포트폴리오의 내용(quantity, totalCost, averageCost)를 초기화한다.
                                     if (portfolio.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
-                                        portfolioRepository.delete(portfolio);
-                                        return;
+                                        portfolio.initializeValues();
                                     }
                                 }
                                 portfolioRepository.save(portfolio);

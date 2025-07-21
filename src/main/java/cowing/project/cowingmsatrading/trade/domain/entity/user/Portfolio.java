@@ -51,4 +51,9 @@ public class Portfolio {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void initializeValues() {
+        this.averageCost = 0L;
+        this.totalCost = 0L;
+        this.quantity = BigDecimal.ZERO;
+    }
 }
