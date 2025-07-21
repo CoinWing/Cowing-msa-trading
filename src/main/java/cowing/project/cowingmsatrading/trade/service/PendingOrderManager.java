@@ -20,6 +20,7 @@ public class PendingOrderManager {
     private final ConcurrentMap<String, PendingOrderDto> pendingOrders;
     private final TradeProcessor tradeProcessor;
     private final OrderService orderService;
+
     private static final long TIMEOUT_HOURS = 5;
 
     @Scheduled(fixedRate = 5000) // 5초마다 미체결 주문 확인
