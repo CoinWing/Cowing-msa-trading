@@ -2,11 +2,11 @@ FROM gradle:8.14.3-jdk21-alpine AS build
 
 WORKDIR /app
 
-COPY build.gradle settings.gradle gradlew ./
-RUN --mount=type=cache,target=/root/.gradle gradle dependencies --no-daemon -x test --build-cache
+COPY build.gradle settings.gradle ./
+RUN gradle dependencies --no-daemon -x test
 
 COPY src ./src
-RUN --mount=type=cache,target=/root/.gradle gradle bootJar -x test --no-daemon --build-cache
+RUN gradle bootJar --no-daemon -x test
 
 RUN java -Djarmode=tools -jar build/libs/*.jar extract --layers --launcher --destination trading-app
 
