@@ -85,9 +85,9 @@ public class OrderService {
             // 자산 업데이트
             userRepository.findByUsername(order.getUsername()).ifPresent(user -> {
                 if (order.getOrderPosition() == OrderPosition.BUY) {
-                    user.decreaseHoldings((long) (totalPrice.longValue() + (totalPrice.longValue() * 0.05)));
+                    user.decreaseHoldings((long) (totalPrice.longValue() + (totalPrice.longValue() * 0.0005)));
                 } else {
-                    user.increaseHoldings((long) (totalPrice.longValue() - (totalPrice.longValue() * 0.05)));
+                    user.increaseHoldings((long) (totalPrice.longValue() - (totalPrice.longValue() * 0.0005)));
                 }
                 userRepository.save(user);
             });
