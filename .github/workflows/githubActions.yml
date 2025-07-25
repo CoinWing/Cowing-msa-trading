@@ -50,13 +50,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/.buildx-cache
-          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile', 'build.gradle') }}
-          restore-keys: ${{ runner.os }}-docker-
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -65,14 +58,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ steps.image_name.outputs.image_name }}:${{ steps.version.outputs.version }}
             ${{ env.REGISTRY }}/${{ steps.image_name.outputs.image_name }}:latest
-          cache-from: type=local,src=${{ runner.temp }}/.buildx-cache
-          cache-to: type=local,dest=${{ runner.temp }}/.buildx-cache-new, mode=max
-
-      # 캐시 누적 방지
-      - name: Move cache
-        run: |
-          rm -rf ${{ runner.temp }}/.buildx-cache
-          mv ${{ runner.temp }}/.buildx-cache-new ${{ runner.temp }}/.buildx-cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # 디스코드 알람 전송
       - name: Send Discord Notification
@@ -142,14 +129,6 @@ jobs:
               "timestamp": "'"$(date -u +"%Y-%m-%dT%H:%M:%SZ")"'"
             }]
           }'
-
-      - name: Checkout GitOps repository
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.GITOPS_REPO }}
-          token: ${{ secrets.GITOPS_TOKEN }}
-          path: gitops
-          ref: prod
 
       - name: Update image tag in kustomization.yaml
         run: |
