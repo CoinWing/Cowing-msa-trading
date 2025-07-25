@@ -29,7 +29,6 @@ public class TradeProcessor {
     private static final int MAX_ATTEMPTS = 5;
 
 
-    // 타입과 포지션에 따라 매매 요청을 처리하는 메서드
     public void startTradeExecution(Order orderForExecution) {
 
         // 주문이 유효한지 확인한다. 매수 주문일 때, 사용자의 보유 금액이 충분한지 확인하고, 매도 주문일 때, 사용자의 보유 수량이 충분한지 확인한다.
