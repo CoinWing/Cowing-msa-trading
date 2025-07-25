@@ -3,7 +3,7 @@ package cowing.project.cowingmsatrading.trade.service;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Status;
 import cowing.project.cowingmsatrading.trade.domain.repository.OrderRepository;
 import cowing.project.cowingmsatrading.trade.domain.repository.TradeRepository;
-import cowing.project.cowingmsatrading.trade.dto.PendingOrderResponse;
+import cowing.project.cowingmsatrading.trade.dto.PendingOrderData;
 import cowing.project.cowingmsatrading.trade.dto.TradeHistoryResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +30,10 @@ public class HistoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<PendingOrderResponse> getPendingOrders(String username) throws AuthenticationException {
+    public List<PendingOrderData> getPendingOrders(String username) throws AuthenticationException {
             validateUsername(username);
             return orderRepository.findAllByUsernameAndStatus(username, Status.PENDING).stream()
-                    .map(PendingOrderResponse::of)
+                    .map(PendingOrderData::of)
                     .toList();
     }
 

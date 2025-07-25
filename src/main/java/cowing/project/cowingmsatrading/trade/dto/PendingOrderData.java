@@ -11,8 +11,8 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 
-@Schema(description = "미체결 주문 응답")
-public record PendingOrderResponse(
+@Schema(description = "미체결 주문 관련 DTO")
+public record PendingOrderData(
         @Schema(description = "주문 UUID", example = "c0e2b0a0-8b7a-4b0e-8b0a-0e2b0a0e2b0a")
         String uuid,
         @Schema(description = "마켓 코드", example = "KRW-BTC")
@@ -32,8 +32,8 @@ public record PendingOrderResponse(
         @Schema(description = "주문 상태", example = "PENDING")
         Status status
 ) {
-    public static PendingOrderResponse of(Order order) {
-        return new PendingOrderResponse(
+    public static PendingOrderData of(Order order) {
+        return new PendingOrderData(
                 order.getUuid(),
                 order.getMarketCode(),
                 order.getOrderType(),
