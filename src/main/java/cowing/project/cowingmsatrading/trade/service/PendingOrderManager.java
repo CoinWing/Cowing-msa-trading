@@ -2,6 +2,7 @@ package cowing.project.cowingmsatrading.trade.service;
 
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderPosition;
+import cowing.project.cowingmsatrading.trade.dto.PendingOrderData;
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
@@ -69,4 +71,32 @@ public class PendingOrderManager {
             log.info("미체결 주문이 완전히 체결되어 대기열에서 제거되었습니다. UUID: {}, 체결 수량: {}", order.getUuid(), result.totalQuantity());
         }
     }
+
+    public void cancelPendingOrders(List<PendingOrderData> ordersToCancel) {
+        if (ordersToCancel == null || ordersToCancel.isEmpty()) return;
+
+        for (PendingOrderData orderData : ordersToCancel) {
+            if (isInvalidCancelRequest(orderData)) continue;
+
+            String uuid = orderData.uuid();
+            PendingOrderDto removedOrder = pendingOrders.remove(uuid);
+
+            if (removedOrder != null) {
+                orderService.cancelOrder(removedOrder.order());
+                log.info("미체결 주문이 성공적으로 취소되어 대기열에서 제거되었습니다. UUID: {}", uuid);
+            } else {
+                log.warn("취소하려는 주문이 대기열에 없습니다. 이미 처리되었을 수 있습니다. UUID: {}", uuid);
+            }
+        }
+    }
+
+    private boolean isInvalidCancelRequest(PendingOrderData orderData) {
+        String uuid = orderData.uuid();
+        if (uuid == null || uuid.isBlank()) {
+            log.warn("유효하지 않은 요청데이터입니다.");
+            return true;
+        }
+        return false;
+    }
+
 }
