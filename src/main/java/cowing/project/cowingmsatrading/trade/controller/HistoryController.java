@@ -1,6 +1,6 @@
 package cowing.project.cowingmsatrading.trade.controller;
 
-import cowing.project.cowingmsatrading.trade.dto.PendingOrderResponse;
+import cowing.project.cowingmsatrading.trade.dto.PendingOrderData;
 import cowing.project.cowingmsatrading.trade.dto.TradeHistoryResponse;
 import cowing.project.cowingmsatrading.trade.service.HistoryService;
 import cowing.project.cowingmsatrading.trade.service.OrderService;
@@ -52,14 +52,14 @@ public class HistoryController {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = {
                     @Content(
                             mediaType = "application/json",
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = PendingOrderResponse.class)
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = PendingOrderData.class)
                     )
             }),
             @ApiResponse(responseCode = "400", description = "조회 실패(인증된 사용자가 아니거나 잘못된 요청 형식)")
     })
     @Parameter(name = "Authorization", description = "Bearer 토큰 형식의 인증 헤더", required = true, example = "Bearer your_jwt_token")
     @GetMapping("/orders/pending")
-    public ResponseEntity<List<PendingOrderResponse>> getPendingOrders(@RequestHeader("Authorization") String authorizationHeader) throws AuthenticationException {
+    public ResponseEntity<List<PendingOrderData>> getPendingOrders(@RequestHeader("Authorization") String authorizationHeader) throws AuthenticationException {
         return ResponseEntity.ok(historyService.getPendingOrders(orderService.extractUsernameFromToken(authorizationHeader)));
     }
 }
