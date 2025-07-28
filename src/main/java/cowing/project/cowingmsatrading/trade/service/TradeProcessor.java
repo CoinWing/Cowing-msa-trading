@@ -7,6 +7,7 @@ import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderPosition;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Trade;
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderDto;
+import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -28,17 +29,16 @@ public class TradeProcessor {
 
     private static final int MAX_ATTEMPTS = 5;
 
-
+    @SqsListener(queueNames = "sample-queue.fifo")
     public void startTradeExecution(Order orderForExecution) {
+            // 주문이 유효한지 확인한다. 매수 주문일 때, 사용자의 보유 금액이 충분한지 확인하고, 매도 주문일 때, 사용자의 보유 수량이 충분한지 확인한다.
+            validateCurrentOrder(orderForExecution);
 
-        // 주문이 유효한지 확인한다. 매수 주문일 때, 사용자의 보유 금액이 충분한지 확인하고, 매도 주문일 때, 사용자의 보유 수량이 충분한지 확인한다.
-        validateCurrentOrder(orderForExecution);
-
-        //요청 타입에 따라 각 메서드로 분기한다.
-        switch (orderForExecution.getOrderType()) {
-            case MARKET -> executeMarketOrder(orderForExecution);
-            case LIMIT -> executeLimitOrder(orderForExecution);
-        }
+            // 요청 타입에 따라 각 메서드로 분기한다
+            switch (orderForExecution.getOrderType()) {
+                case MARKET -> executeMarketOrder(orderForExecution);
+                case LIMIT -> executeLimitOrder(orderForExecution);
+            }
     }
 
     private void validateCurrentOrder(Order orderForExecution) {

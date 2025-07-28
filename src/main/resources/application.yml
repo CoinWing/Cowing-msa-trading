@@ -26,6 +26,16 @@ spring:
             host: localhost
             port: 6379
 
+    cloud:
+        aws:
+            credentials:
+                access-key: qwer
+                secret-key: 1234
+            region:
+                static: ap-northeast-2
+            sqs:
+                endpoint: http://localhost:4566
+
 server:
     port: 8082
 management:
