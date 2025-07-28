@@ -34,6 +34,16 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
 
+  cloud:
+    aws:
+      credentials:
+        access-key: ${ACCESS_KEY}
+        secret-key: ${SECRET_KEY}
+      region:
+        static: ${REGION}
+      sqs:
+        endpoint: ${SQS_URI}
+
 server:
   port: ${SERVER_PORT:8082}
 
