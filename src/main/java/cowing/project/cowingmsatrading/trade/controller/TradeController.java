@@ -3,9 +3,7 @@ package cowing.project.cowingmsatrading.trade.controller;
 import cowing.project.cowingmsatrading.trade.dto.LimitOrderDto;
 import cowing.project.cowingmsatrading.trade.dto.MarketBuyOrderDto;
 import cowing.project.cowingmsatrading.trade.dto.MarketSellOrderDto;
-import cowing.project.cowingmsatrading.trade.management.OrderQueue;
-import cowing.project.cowingmsatrading.trade.management.OrderTask;
-import cowing.project.cowingmsatrading.trade.service.OrderService;
+import cowing.project.cowingmsatrading.trade.service.TradeRequestPublisher;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,14 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Trade Engine", description = "매매 체결 관련 API")
 public class TradeController {
 
-    private final OrderQueue orderQueue;
-    private final OrderService orderService;
+    private final TradeRequestPublisher tradeRequestPublisher;
 
     @Operation(summary = "시장가 매수 주문", description = "시장가로 매수 주문을 처리합니다.")
     @ApiResponse(responseCode = "200", description = "주문이 접수되었습니다.")
     @PostMapping("/api/v1/orders/market/buy")
     public ResponseEntity<String> buy(@RequestBody MarketBuyOrderDto marketBuyOrderDto, @RequestHeader("Authorization") String token) {
-        orderQueue.enqueue(new OrderTask(marketBuyOrderDto.toOrder(orderService.extractUsernameFromToken(token))));
+        tradeRequestPublisher.enqueue(marketBuyOrderDto, token);
         return ResponseEntity.ok("주문이 접수되었습니다.");
     }
 
@@ -36,7 +33,7 @@ public class TradeController {
     @ApiResponse(responseCode = "200", description = "주문이 접수되었습니다.")
     @PostMapping("/api/v1/orders/market/sell")
     public ResponseEntity<String> sell(@RequestBody MarketSellOrderDto marketSellOrderDto, @RequestHeader("Authorization") String token) {
-        orderQueue.enqueue(new OrderTask(marketSellOrderDto.toOrder(orderService.extractUsernameFromToken(token))));
+        tradeRequestPublisher.enqueue(marketSellOrderDto, token);
         return ResponseEntity.ok("주문이 접수되었습니다.");
     }
 
@@ -44,7 +41,7 @@ public class TradeController {
     @ApiResponse(responseCode = "200", description = "주문이 접수되었습니다.")
     @PostMapping("/api/v1/orders/limit")
     public ResponseEntity<String> limit(@RequestBody LimitOrderDto limitOrderDto, @RequestHeader("Authorization") String token) {
-        orderQueue.enqueue(new OrderTask(limitOrderDto.toOrder(orderService.extractUsernameFromToken(token))));
+        tradeRequestPublisher.enqueue(limitOrderDto, token);
         return ResponseEntity.ok("주문이 접수되었습니다.");
     }
 }

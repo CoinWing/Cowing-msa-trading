@@ -30,6 +30,9 @@ public record LimitOrderDto(
         @Schema(description = "총 주문 금액", example = "100000000")
         @JsonProperty("total_order_price") @NotNull @Positive BigDecimal totalOrderPrice,
 
+        @Schema(description = "코인 티커", example = "BTC")
+        @JsonProperty("coin_ticker") String coinTicker,
+
         @Schema(hidden = true)
         LocalDateTime orderRequestedAt
 ) implements OrderDto {

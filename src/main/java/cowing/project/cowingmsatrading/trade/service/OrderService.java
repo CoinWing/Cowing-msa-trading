@@ -120,4 +120,36 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    protected void validateOrderPreconditions(String username, Order order) throws IllegalArgumentException {
+        transactionTemplate.execute(status -> {
+            userRepository.findByUsername(username)
+                    .ifPresentOrElse(
+                            user -> {
+                                if (order.getOrderPosition() == OrderPosition.BUY) {
+                                    if (user.getUHoldings() < order.getTotalPrice()) {
+                                        throw new IllegalArgumentException("사용자의 재산이 부족합니다.");
+                                    }
+                                } else {
+                                    portfolioRepository.findByUsernameAndMarketCode(username, order.getMarketCode())
+                                            .ifPresentOrElse(
+                                                    portfolio -> {
+                                                        if (portfolio.getQuantity().compareTo(order.getTotalQuantity()) < 0) {
+                                                            throw new IllegalArgumentException("매도할 수량이 부족합니다.");
+                                                        }
+                                                    },
+                                                    () -> {
+                                                        throw new IllegalArgumentException("보유한 코인이 없습니다.");
+                                                    }
+                                            );
+                                }
+                            },
+                            () -> {
+                                throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+                            }
+                    );
+            orderRepository.save(order);
+            return null;
+        });
+    }
+
 }
