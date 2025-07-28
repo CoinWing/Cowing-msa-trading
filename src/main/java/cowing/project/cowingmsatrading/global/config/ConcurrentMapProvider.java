@@ -1,4 +1,4 @@
-package cowing.project.cowingmsatrading.trade.management;
+package cowing.project.cowingmsatrading.global.config;
 
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderDto;
 import org.springframework.context.annotation.Bean;
