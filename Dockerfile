@@ -19,12 +19,10 @@ RUN addgroup --gid ${ID} javauser && \
 WORKDIR /app
 
 ARG LAYERED_JAR=/app/trading-app
-COPY --from=build --chown=javauser:javauser ${LAYERED_JAR}/dependencies/ ./
-COPY --from=build --chown=javauser:javauser ${LAYERED_JAR}/spring-boot-loader/ ./
-COPY --from=build --chown=javauser:javauser ${LAYERED_JAR}/snapshot-dependencies/ ./
-COPY --from=build --chown=javauser:javauser ${LAYERED_JAR}/application/ ./
-
-RUN chmod -R 555 /app
+COPY --from=build ${LAYERED_JAR}/dependencies/ ./
+COPY --from=build ${LAYERED_JAR}/spring-boot-loader/ ./
+COPY --from=build ${LAYERED_JAR}/snapshot-dependencies/ ./
+COPY --from=build ${LAYERED_JAR}/application/ ./
 
 EXPOSE 8082
 
