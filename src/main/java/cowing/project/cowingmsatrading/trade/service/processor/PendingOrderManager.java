@@ -1,9 +1,10 @@
-package cowing.project.cowingmsatrading.trade.service;
+package cowing.project.cowingmsatrading.trade.service.processor;
 
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderPosition;
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderData;
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderDto;
+import cowing.project.cowingmsatrading.trade.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
