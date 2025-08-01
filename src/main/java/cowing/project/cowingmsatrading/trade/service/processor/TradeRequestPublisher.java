@@ -1,17 +1,18 @@
-package cowing.project.cowingmsatrading.trade.service;
+package cowing.project.cowingmsatrading.trade.service.processor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.dto.OrderDto;
+import cowing.project.cowingmsatrading.trade.service.OrderService;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
-
-@Service
+@Component
 @RequiredArgsConstructor
 public class TradeRequestPublisher {
 
@@ -19,7 +20,8 @@ public class TradeRequestPublisher {
     private final OrderService orderService;
     private final ObjectMapper objectMapper;
 
-    private final String q = "sample-queue.fifo";
+    @Value("${QUEUE_NAME}")
+    private String queueName;
 
     public void enqueue(OrderDto orderDto, String token) throws IllegalArgumentException {
         String username = orderService.extractUsernameFromToken(token);
@@ -28,7 +30,7 @@ public class TradeRequestPublisher {
         try {
             String orderDtoJson = objectMapper.writeValueAsString(orderToSQS);
             sqsTemplate.send(to -> to
-                    .queue(q)
+                    .queue(queueName)
                     .messageGroupId(username)
                     .messageDeduplicationId(generateDeduplicationId(username, orderToSQS))
                     .payload(orderDtoJson)
