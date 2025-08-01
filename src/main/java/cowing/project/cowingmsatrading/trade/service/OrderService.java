@@ -35,7 +35,7 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    protected void processTradeRecordsAndSettlement(Order order, List<Trade> tradeRecords, BigDecimal totalQuantity, BigDecimal totalPrice) {
+    public void processTradeRecordsAndSettlement(Order order, List<Trade> tradeRecords, BigDecimal totalQuantity, BigDecimal totalPrice) {
         transactionTemplate.execute(status -> {
             // 체결 내역 저장
             tradeRepository.saveAll(tradeRecords);
@@ -96,31 +96,7 @@ public class OrderService {
         });
     }
 
-    @Transactional(readOnly = true)
-    public boolean checkUserAssets(String username, Long totalPrice) {
-        return userRepository.findByUsername(username)
-                .map(user -> user.getUHoldings() >= totalPrice)
-                .orElse(false);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean checkPortfolio(String username, String marketCode, BigDecimal totalQuantity) {
-        return portfolioRepository.findByUsernameAndMarketCode(username, marketCode)
-                .map(portfolio -> portfolio.getQuantity().compareTo(totalQuantity) >= 0)
-                .orElse(false);
-    }
-
-    public String extractUsernameFromToken(String token) {
-        return tokenProvider.getUsername(token.replace("Bearer ", ""));
-    }
-
-    @Transactional
-    public void cancelOrder(Order order) {
-        order.setStatus(Status.CANCELLED);
-        orderRepository.save(order);
-    }
-
-    protected void validateOrderPreconditions(String username, Order order) throws IllegalArgumentException {
+    public void validateOrderPreconditions(String username, Order order) throws IllegalArgumentException {
         transactionTemplate.execute(status -> {
             userRepository.findByUsername(username)
                     .ifPresentOrElse(
@@ -151,5 +127,16 @@ public class OrderService {
             return null;
         });
     }
+
+    public String extractUsernameFromToken(String token) {
+        return tokenProvider.getUsername(token.replace("Bearer ", ""));
+    }
+
+    @Transactional
+    public void cancelOrder(Order order) {
+        order.setStatus(Status.CANCELLED);
+        orderRepository.save(order);
+    }
+
 
 }
