@@ -4,6 +4,7 @@ import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderPosition;
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderData;
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderDto;
+import cowing.project.cowingmsatrading.trade.dto.TradeExecutionResult;
 import cowing.project.cowingmsatrading.trade.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +59,7 @@ public class PendingOrderManager {
         BigDecimal limitPrice = BigDecimal.valueOf(order.getOrderPrice());
 
         // TradeProcessor의 공통 로직을 재사용하여 체결 시도
-        TradeProcessor.TradeExecutionResult result;
+        TradeExecutionResult result;
         try {
             result = tradeProcessor.executeTradeWithCondition(order, remaining, isBuyOrder, limitPrice);
         } catch (Exception e) {
