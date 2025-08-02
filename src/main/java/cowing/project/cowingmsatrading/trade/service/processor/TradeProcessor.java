@@ -7,6 +7,8 @@ import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderPosition;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Trade;
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderDto;
+import cowing.project.cowingmsatrading.trade.dto.TradeCalculationResult;
+import cowing.project.cowingmsatrading.trade.dto.TradeExecutionResult;
 import cowing.project.cowingmsatrading.trade.service.OrderService;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
@@ -202,11 +204,4 @@ public class TradeProcessor {
         return remaining.compareTo(BigDecimal.ZERO) == 0;
     }
 
-    // 거래 계산 결과를 담는 레코드
-    public record TradeCalculationResult(BigDecimal tradeQuantity, BigDecimal tradePrice, BigDecimal remainingAfterTrade) {
-    }
-
-    // 거래 실행 결과
-    public record TradeExecutionResult(List<Trade> tradeRecords, BigDecimal totalQuantity, BigDecimal totalPrice, BigDecimal remainingAfterTrade) {
-    }
 }
