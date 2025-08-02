@@ -3,7 +3,7 @@ package cowing.project.cowingmsatrading.trade.controller;
 import cowing.project.cowingmsatrading.trade.dto.LimitOrderDto;
 import cowing.project.cowingmsatrading.trade.dto.MarketBuyOrderDto;
 import cowing.project.cowingmsatrading.trade.dto.MarketSellOrderDto;
-import cowing.project.cowingmsatrading.trade.service.TradeRequestPublisher;
+import cowing.project.cowingmsatrading.trade.service.processor.TradeRequestPublisher;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;

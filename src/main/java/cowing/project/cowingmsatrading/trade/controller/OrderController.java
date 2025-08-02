@@ -1,7 +1,7 @@
 package cowing.project.cowingmsatrading.trade.controller;
 
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderData;
-import cowing.project.cowingmsatrading.trade.service.PendingOrderManager;
+import cowing.project.cowingmsatrading.trade.service.processor.PendingOrderManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;

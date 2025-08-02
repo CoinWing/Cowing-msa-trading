@@ -1,4 +1,4 @@
-package cowing.project.cowingmsatrading.trade.service;
+package cowing.project.cowingmsatrading.trade.service.processor;
 
 import cowing.project.cowingmsatrading.global.exception.OrderPendingException;
 import cowing.project.cowingmsatrading.orderbook.RealTimeOrderbook;
@@ -7,6 +7,9 @@ import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderPosition;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Trade;
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderDto;
+import cowing.project.cowingmsatrading.trade.dto.TradeCalculationResult;
+import cowing.project.cowingmsatrading.trade.dto.TradeExecutionResult;
+import cowing.project.cowingmsatrading.trade.service.OrderService;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,33 +32,14 @@ public class TradeProcessor {
 
     private static final int MAX_ATTEMPTS = 5;
 
-    @SqsListener(queueNames = "sample-queue.fifo")
+    @SqsListener(queueNames = "${QUEUE_NAME}")
     public void startTradeExecution(Order orderForExecution) {
-            // 주문이 유효한지 확인한다. 매수 주문일 때, 사용자의 보유 금액이 충분한지 확인하고, 매도 주문일 때, 사용자의 보유 수량이 충분한지 확인한다.
-            validateCurrentOrder(orderForExecution);
 
             // 요청 타입에 따라 각 메서드로 분기한다
             switch (orderForExecution.getOrderType()) {
                 case MARKET -> executeMarketOrder(orderForExecution);
                 case LIMIT -> executeLimitOrder(orderForExecution);
             }
-    }
-
-    private void validateCurrentOrder(Order orderForExecution) {
-        switch (orderForExecution.getOrderPosition()) {
-            case BUY -> {
-                if (!orderService.checkUserAssets(orderForExecution.getUsername(), orderForExecution.getTotalPrice())) {
-                    log.error("사용자의 자산이 부족합니다. 주문을 처리할 수 없습니다.");
-                    throw new IllegalStateException("사용자의 자산이 부족합니다.");
-                }
-            }
-            case SELL -> {
-                if (!orderService.checkPortfolio(orderForExecution.getUsername(), orderForExecution.getMarketCode(), orderForExecution.getTotalQuantity())) {
-                    log.error("사용자의 포트폴리오에 충분한 수량이 없습니다. 주문을 처리할 수 없습니다.");
-                    throw new IllegalStateException("사용자의 포트폴리오에 충분한 수량이 없습니다.");
-                }
-            }
-        }
     }
 
     // 시장가 매매 주문 처리
@@ -220,11 +204,4 @@ public class TradeProcessor {
         return remaining.compareTo(BigDecimal.ZERO) == 0;
     }
 
-    // 거래 계산 결과를 담는 레코드
-    public record TradeCalculationResult(BigDecimal tradeQuantity, BigDecimal tradePrice, BigDecimal remainingAfterTrade) {
-    }
-
-    // 거래 실행 결과
-    public record TradeExecutionResult(List<Trade> tradeRecords, BigDecimal totalQuantity, BigDecimal totalPrice, BigDecimal remainingAfterTrade) {
-    }
 }
