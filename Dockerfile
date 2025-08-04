@@ -1,12 +1,19 @@
-FROM gradle:8.14.3-jdk21-alpine AS build
+FROM eclipse-temurin:21-jdk-alpine-3.20 AS build
 
 WORKDIR /app
 
-COPY build.gradle settings.gradle ./
-RUN gradle dependencies --no-daemon -x test
+# Gradle wrapper와 빌드 스크립트 먼저 복사 (캐싱 최적화)
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle ./gradle
 
+# Gradle 의존성 캐시를 활용하여 의존성 다운로드
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew dependencies --no-daemon -x test
+
+# 소스 코드 복사 및 빌드
 COPY src ./src
-RUN gradle bootJar --no-daemon -x test
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew bootJar --no-daemon -x test
 
 RUN java -Djarmode=tools -jar build/libs/*.jar extract --layers --launcher --destination trading-app
 
