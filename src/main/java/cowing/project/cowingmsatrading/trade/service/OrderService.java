@@ -30,11 +30,6 @@ public class OrderService {
     private final TokenProvider tokenProvider;
     private final TransactionTemplate transactionTemplate;
 
-    @Transactional
-    public void insertToOrderHistory(Order order) {
-        orderRepository.save(order);
-    }
-
     public void processTradeRecordsAndSettlement(Order order, List<Trade> tradeRecords, BigDecimal totalQuantity, BigDecimal totalPrice) {
         transactionTemplate.execute(status -> {
             // 체결 내역 저장
