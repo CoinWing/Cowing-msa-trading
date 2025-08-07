@@ -6,7 +6,6 @@ import cowing.project.cowingmsatrading.orderbook.vo.OrderbookUnitVo;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderPosition;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Trade;
-import cowing.project.cowingmsatrading.trade.dto.PendingOrderDto;
 import cowing.project.cowingmsatrading.trade.dto.TradeCalculationResult;
 import cowing.project.cowingmsatrading.trade.dto.TradeExecutionResult;
 import cowing.project.cowingmsatrading.trade.service.OrderService;
@@ -19,7 +18,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+
 
 @Slf4j
 @Component
@@ -28,7 +27,7 @@ public class TradeProcessor {
 
     private final OrderService orderService;
     private final RealTimeOrderbook orderbookProvider;
-    private final ConcurrentHashMap<String, PendingOrderDto> pendingOrders;
+    private final PendingOrderSetManager pendingOrderSetManager;
 
     private static final int MAX_ATTEMPTS = 5;
 
@@ -76,9 +75,9 @@ public class TradeProcessor {
         int attemptCount = 0;
 
         do {
-
+            // 지정가 주문의 경우, 최대 시도 횟수를 초과하면 대기열에 추가
             if (limitPrice != null && ++attemptCount >= MAX_ATTEMPTS) {
-                pendingOrders.putIfAbsent(order.getUuid(), new PendingOrderDto(order, remaining));
+                pendingOrderSetManager.addOrderToPendingQueue(order, remaining);
                 throw new OrderPendingException(order.getUuid());
             }
 
@@ -154,7 +153,7 @@ public class TradeProcessor {
 
     // 제약 조건 확인
     private static boolean checkConstraints(BigDecimal remaining) {
-        return remaining.compareTo(BigDecimal.ZERO) < 0 || remaining.compareTo(BigDecimal.ZERO) == 0 || remaining.scale() == 3 || remaining.scale() > 3;
+        return remaining.compareTo(BigDecimal.ZERO) < 0 || remaining.compareTo(BigDecimal.ZERO) == 0 || remaining.scale() == 3 || remaining.scale() > 3 || remaining.compareTo(BigDecimal.ONE) == 0;
     }
 
     // 매수/매도 주문에 따라 남은 금액 또는 수량 초기화
