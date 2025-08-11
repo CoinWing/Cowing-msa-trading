@@ -1,13 +1,16 @@
 package cowing.project.cowingmsatrading.trade.controller;
 
 import cowing.project.cowingmsatrading.trade.dto.PendingOrderData;
-import cowing.project.cowingmsatrading.trade.service.processor.PendingOrderManager;
+import cowing.project.cowingmsatrading.trade.service.processor.PendingOrderProcessor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,13 +20,13 @@ import java.util.List;
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderController {
-    private final PendingOrderManager pendingOrderManager;
+    private final PendingOrderProcessor pendingOrderProcessor;
 
     @Operation(summary = "미체결 주문 취소", description = "대기열에 있는 특정 미체결 주문들을 취소합니다.")
     @ApiResponse(responseCode = "200", description = "취소가 완료되었습니다.")
     @PostMapping("/pending")
     public ResponseEntity<String> cancelOrders(@RequestBody List<PendingOrderData> ordersToCancel){
-        pendingOrderManager.cancelPendingOrders(ordersToCancel);
+        pendingOrderProcessor.cancelPendingOrders(ordersToCancel);
         return ResponseEntity.ok("취소가 완료되었습니다.");
     }
 }

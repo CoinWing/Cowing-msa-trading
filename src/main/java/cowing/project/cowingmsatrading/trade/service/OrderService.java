@@ -133,5 +133,16 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    @Transactional
+    public void cancelOrderByUuid(String uuid) {
+        orderRepository.findByUuid(uuid).ifPresent(order -> {
+            order.setStatus(Status.CANCELLED);
+            orderRepository.save(order);
+        });
+    }
 
+    @Transactional(readOnly = true)
+    public boolean isOrderExists(String uuid) {
+        return orderRepository.findByUuid(uuid).isPresent();
+    }
 }

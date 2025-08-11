@@ -1,11 +1,10 @@
 package cowing.project.cowingmsatrading.orderbook;
 
 import cowing.project.cowingmsatrading.orderbook.vo.OrderbookUnitVo;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +12,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class RealTimeOrderbook {
 
     private static final String ORDERBOOK_KEY_PREFIX = "orderbook:";
@@ -21,6 +19,10 @@ public class RealTimeOrderbook {
     private static final String BIDS_KEY_SUFFIX = ":bids";
 
     private final RedisTemplate<String, String> redis;
+
+    public RealTimeOrderbook(@Qualifier("orderbookRedisTemplate") RedisTemplate<String, String> redis) {
+        this.redis = redis;
+    }
 
     /**
      * 특정 종목의 매도 호가 정보를 가격 오름차순으로 조회한다.
