@@ -44,16 +44,21 @@ public class TradeProcessor {
 
     // 시장가 매매 주문 처리
     private void executeMarketOrder(Order order) {
-        boolean isBuyOrder = confirmBuyOrder(order.getOrderPosition());
-        BigDecimal remaining = initializeRemaining(isBuyOrder, order.getTotalPrice(), order.getTotalQuantity());
+        try {
+            boolean isBuyOrder = confirmBuyOrder(order.getOrderPosition());
+            BigDecimal remaining = initializeRemaining(isBuyOrder, order.getTotalPrice(), order.getTotalQuantity());
 
-        TradeExecutionResult result = executeTradeWithCondition(order, remaining, isBuyOrder, null);
+            TradeExecutionResult result = executeTradeWithCondition(order, remaining, isBuyOrder, null);
 
-        orderService.processTradeRecordsAndSettlement(order, result.tradeRecords(), result.totalQuantity(), result.totalPrice());
+            orderService.processTradeRecordsAndSettlement(order, result.tradeRecords(), result.totalQuantity(), result.totalPrice());
+        } catch (Exception e) {
+            log.error("시장가 요청 처리 중 오류 발생. Msg: {}", e.getMessage());
+        }
     }
 
      // 지정가 매매 주문 처리
     private void executeLimitOrder(Order order) {
+
         boolean isBuyOrder = confirmBuyOrder(order.getOrderPosition());
         BigDecimal limitPrice = BigDecimal.valueOf(order.getOrderPrice());
         BigDecimal remainingQuantity = order.getTotalQuantity();
@@ -65,7 +70,11 @@ public class TradeProcessor {
             log.info("지정가 주문이 " + MAX_ATTEMPTS + "번의 호가 조회 시도 후에도 체결되지 않았습니다. 대기열로 넘어갑니다. UUID: {}", e.getMessage());
             return;
         }
-        orderService.processTradeRecordsAndSettlement(order, result.tradeRecords(), result.totalQuantity(), result.totalPrice());
+        try {
+            orderService.processTradeRecordsAndSettlement(order, result.tradeRecords(), result.totalQuantity(), result.totalPrice());
+        } catch (Exception e) {
+            log.error("지정가 요청 처리 중 오류 발생. Msg: {}", e.getMessage());
+        }
     }
 
     // 조건에 따른 거래 실행 공통 로직
