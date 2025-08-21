@@ -1,5 +1,6 @@
 package cowing.project.cowingmsatrading.trade.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.Order;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderPosition;
 import cowing.project.cowingmsatrading.trade.domain.entity.order.OrderType;
@@ -28,6 +29,7 @@ public record PendingOrderData(
         @Schema(description = "주문 수량", example = "0.1")
         BigDecimal totalQuantity,
         @Schema(description = "주문 요청 시간", example = "2023-10-01T12:00:00")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime orderRequestedAt,
         @Schema(description = "주문 상태", example = "PENDING")
         Status status
