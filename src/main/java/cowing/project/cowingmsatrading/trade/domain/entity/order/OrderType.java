@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum OrderType {
     MARKET("market"),
-    LIMIT("market");
+    LIMIT("limit");
 
     private final String orderType;
 
