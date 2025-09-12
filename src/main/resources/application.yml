@@ -20,6 +20,8 @@ spring:
             hibernate:
                 format_sql: true
                 dialect: org.hibernate.dialect.MariaDBDialect
+                session_factory:
+                    statement_inspector: cowing.project.cowingmsatrading.scope.CountingStatementInspector
 
     data:
         redis:
