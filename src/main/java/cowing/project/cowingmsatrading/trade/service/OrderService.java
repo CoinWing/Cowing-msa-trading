@@ -10,6 +10,7 @@ import cowing.project.cowingmsatrading.trade.domain.repository.OrderRepository;
 import cowing.project.cowingmsatrading.trade.domain.repository.PortfolioRepository;
 import cowing.project.cowingmsatrading.trade.domain.repository.TradeRepository;
 import cowing.project.cowingmsatrading.trade.domain.repository.UserRepository;
+import cowing.project.cowingmsatrading.trade.service.processor.PendingOrderSetManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +30,12 @@ public class OrderService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final TransactionTemplate transactionTemplate;
+    private final PendingOrderSetManager pendingOrderSetManager;
+
 
     public void processTradeRecordsAndSettlement(Order order, List<Trade> tradeRecords, BigDecimal totalQuantity, BigDecimal totalPrice) {
+
+        pendingOrderSetManager.delete(order.getUuid());
         transactionTemplate.execute(status -> {
             // 체결 내역 저장
             tradeRepository.saveAll(tradeRecords);
@@ -73,7 +78,7 @@ public class OrderService {
                                     )
                     );
 
-            // 주문 상태를 완료로 변경
+            // 주문 상태를 완료로 변경하고 DB 저장
             order.setStatus(Status.COMPLETED);
             orderRepository.save(order);
 
@@ -118,7 +123,6 @@ public class OrderService {
                                 throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
                             }
                     );
-            orderRepository.save(order);
             return null;
         });
     }
@@ -127,22 +131,18 @@ public class OrderService {
         return tokenProvider.getUsername(token.replace("Bearer ", ""));
     }
 
-    @Transactional
-    public void cancelOrder(Order order) {
-        order.setStatus(Status.CANCELLED);
-        orderRepository.save(order);
-    }
 
     @Transactional
     public void cancelOrderByUuid(String uuid) {
-        orderRepository.findByUuid(uuid).ifPresent(order -> {
+        // Redis에 있는 주문만 취소 처리하고 DB에 CANCELLED로 기록
+        pendingOrderSetManager.delete(uuid).ifPresent(order -> {
             order.setStatus(Status.CANCELLED);
             orderRepository.save(order);
         });
     }
 
-    @Transactional(readOnly = true)
     public boolean isOrderExists(String uuid) {
-        return orderRepository.findByUuid(uuid).isPresent();
+        // DB 대신 Redis에서 존재 여부 확인
+        return pendingOrderSetManager.existsPendingOrder(uuid);
     }
 }

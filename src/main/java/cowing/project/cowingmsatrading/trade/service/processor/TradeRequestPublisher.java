@@ -19,6 +19,7 @@ public class TradeRequestPublisher {
     private final SqsTemplate sqsTemplate;
     private final OrderService orderService;
     private final ObjectMapper objectMapper;
+    private final PendingOrderSetManager pendingOrderSetManager;
 
     @Value("${QUEUE_NAME}")
     private String queueName;
@@ -26,7 +27,11 @@ public class TradeRequestPublisher {
     public void enqueue(OrderDto orderDto, String token) throws IllegalArgumentException {
         String username = orderService.extractUsernameFromToken(token);
         Order orderToSQS = orderDto.toOrder(username);
+        // 1) 요청 유효성 검사 (DB 조회 기반)
         orderService.validateOrderPreconditions(username, orderToSQS);
+        // 2) Redis 에 우선 저장 (미체결 주문 저장)
+        pendingOrderSetManager.savePendingOrder(orderToSQS);
+        // 3) SQS 로 발행
         try {
             String orderDtoJson = objectMapper.writeValueAsString(orderToSQS);
             sqsTemplate.send(to -> to
