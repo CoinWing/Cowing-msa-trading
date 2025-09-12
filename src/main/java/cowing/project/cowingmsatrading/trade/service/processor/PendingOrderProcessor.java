@@ -97,7 +97,7 @@ public class PendingOrderProcessor {
 
         // 주문이 5시간 이상 지났다면 취소 처리
         if (order.getOrderRequestedAt().isBefore(LocalDateTime.now().minusHours(TIMEOUT_HOURS))) {
-            orderService.cancelOrder(order);
+            orderService.cancelOrderByUuid(order.getUuid());
             log.info("주문 시간(5시간) 초과로 취소 처리되었습니다. UUID: {}", order.getUuid());
             return false;
         }

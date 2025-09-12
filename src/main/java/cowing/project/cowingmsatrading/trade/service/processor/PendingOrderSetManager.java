@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -19,6 +20,8 @@ public class PendingOrderSetManager {
     private final RedisTemplate<String, Object> pendingRedis;
     private final String PENDING_ORDERS_SET_KEY; // 대기열 중복 방지 set
     private final String CANCELLED_ORDERS_KEY; // 취소 요청 set
+
+    private String pendingKey(String uuid) { return "orders:pending:" + uuid; }
 
     public PendingOrderSetManager(@Qualifier("pendingRedisTemplate") RedisTemplate<String, Object> pendingRedis) {
         this.pendingRedis = pendingRedis;
@@ -60,7 +63,6 @@ public class PendingOrderSetManager {
         return Boolean.TRUE.equals(pendingRedis.opsForSet().isMember(CANCELLED_ORDERS_KEY, uuid));
     }
 
-
     protected void setCancelledOrderFlag(String uuid) {
         pendingRedis.opsForSet().add(CANCELLED_ORDERS_KEY, uuid);
     }
@@ -78,4 +80,23 @@ public class PendingOrderSetManager {
         return false;
     }
 
+    public void savePendingOrder(Order order) {
+        pendingRedis.opsForValue().set(pendingKey(order.getUuid()), order);
+    }
+
+    public Optional<Order> findPendingOrder(String uuid) {
+        Object obj = pendingRedis.opsForValue().get(pendingKey(uuid));
+        if (obj instanceof Order o) return Optional.of(o);
+        return Optional.empty();
+    }
+
+    public Optional<Order> delete(String uuid) {
+        Optional<Order> found = findPendingOrder(uuid);
+        pendingRedis.delete(pendingKey(uuid));
+        return found;
+    }
+
+    public boolean existsPendingOrder(String uuid) {
+        return pendingRedis.hasKey(pendingKey(uuid));
+    }
 }
